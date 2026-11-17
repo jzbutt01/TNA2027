@@ -13,7 +13,7 @@
 //  Leave SUPABASE_URL empty to run the demo with dummy data.
 // =====================================================================
 window.TNA_CONFIG = {
-  SUPABASE_URL: 'https://cxvqefkyvwydmjmmdzgw.supabase.co/rest/v1/',              // e.g. 'https://abcdefgh.supabase.co'
+  SUPABASE_URL: 'https://cxvqefkyvwydmjmmdzgw.supabase.co',              // e.g. 'https://abcdefgh.supabase.co'
   SUPABASE_ANON_KEY: 'sb_publishable_1XgvEs-4LQAOhnsl2ROaVg_usTPHGfA',         // long key starting with 'eyJ…' or 'sb_publishable_…'
   ORG_NAME: 'Software Finder',
   AUTH: {
@@ -785,6 +785,8 @@ function friendly(error) {
 function createApi(cfg) {
   if (!cfg.SUPABASE_URL) return createDemoApi(cfg);
 
+  // Accept a pasted REST/API address too: keep only https://xxxx.supabase.co
+  cfg.SUPABASE_URL = String(cfg.SUPABASE_URL).trim().replace(/\/(rest|auth|functions|storage)\/v1.*$/i, '').replace(/\/+$/, '');
   const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
   });
@@ -999,7 +1001,7 @@ function renderLogin(message) {
     e.preventDefault();
     const btn = qs('button', pf);
     try { await busy(btn, () => api.signInPassword(pf.email.value.trim(), pf.password.value)); }
-    catch (er) { toast(/invalid/i.test(er.message) ? 'Email or password is incorrect' : er.message, 'err'); }
+    catch (er) { toast(/invalid login credentials/i.test(er.message) ? 'Email or password is incorrect' : 'Sign-in failed: ' + er.message, 'err'); }
   };
   const f = qs('#em'); if (f) f.onsubmit = async e => {
     e.preventDefault(); const email = qs('input', f).value.trim();
